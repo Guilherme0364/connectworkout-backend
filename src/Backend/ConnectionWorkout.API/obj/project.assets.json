@@ -3348,6 +3348,7 @@
       "ConnectWorkout.Application >= 1.0.0",
       "ConnectWorkout.Communication >= 1.0.0",
       "ConnectWorkout.Exception >= 1.0.0",
+      "ConnectWorkout.Infrastructure >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.6.2"
     ]
   },
@@ -3387,6 +3388,9 @@
             "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Backend\\ConnectionWorkout.Application\\ConnectWorkout.Application.csproj": {
               "projectPath": "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Backend\\ConnectionWorkout.Application\\ConnectWorkout.Application.csproj"
             },
+            "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Backend\\ConnectWorkout.Infrastructure\\ConnectWorkout.Infrastructure.csproj": {
+              "projectPath": "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Backend\\ConnectWorkout.Infrastructure\\ConnectWorkout.Infrastructure.csproj"
+            },
             "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Shared\\ConnectWorkout.Communication\\ConnectWorkout.Communication.csproj": {
               "projectPath": "C:\\Users\\guilh\\OneDrive\\Área de Trabalho\\connectworkout-backend\\src\\Shared\\ConnectWorkout.Communication\\ConnectWorkout.Communication.csproj"
             },
@@ -3406,7 +3410,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -3436,7 +3440,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.103/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

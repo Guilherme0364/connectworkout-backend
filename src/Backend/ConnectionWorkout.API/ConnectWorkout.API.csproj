@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\Shared\ConnectWorkout.Communication\ConnectWorkout.Communication.csproj" />
     <ProjectReference Include="..\..\Shared\ConnectWorkout.Exceptions\ConnectWorkout.Exception.csproj" />
     <ProjectReference Include="..\ConnectionWorkout.Application\ConnectWorkout.Application.csproj" />
+    <ProjectReference Include="..\ConnectWorkout.Infrastructure\ConnectWorkout.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
