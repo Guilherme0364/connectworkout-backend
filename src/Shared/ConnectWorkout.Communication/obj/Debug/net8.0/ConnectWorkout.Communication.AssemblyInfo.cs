@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ConnectWorkout.Communication")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d6d79004a5a213c8b1c26483f499f67b65854a14")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+013f8f31598fb221976f651d9c0230ae06390aa8")]
 [assembly: System.Reflection.AssemblyProductAttribute("ConnectWorkout.Communication")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ConnectWorkout.Communication")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
