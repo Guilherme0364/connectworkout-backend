@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv:*)",
+      "Bash(if [ -f \"FitnessApp.Core.csproj\" ])",
+      "Bash(then mv \"FitnessApp.Core.csproj\" \"ConnectWorkout.Core.csproj\")",
+      "Bash(else echo \"File not found\")",
+      "Bash(fi)",
+      "Bash(if [ -f \"FitnessApp.Infrastructure.csproj\" ])",
+      "Bash(then mv \"FitnessApp.Infrastructure.csproj\" \"ConnectWorkout.Infrastructure.csproj\")",
+      "Bash(if [ -f \"FitnessApp.API.csproj\" ])",
+      "Bash(then mv \"FitnessApp.API.csproj\" \"ConnectWorkout.API.csproj\")",
+      "Bash(if [ -f \"FitnessApp.API.http\" ])",
+      "Bash(then mv \"FitnessApp.API.http\" \"ConnectWorkout.API.http\")",
+      "Bash(powershell.exe:*)",
+      "Bash(dotnet build:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

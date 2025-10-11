@@ -1,0 +1,17 @@
+# Pastas de build
+[Bb]in/
+[Oo]bj/
+
+# Arquivos de usuário
+*.suo
+*.user
+*.pdb
+*.vsp
+*.log
+*.vspscc
+
+# Pasta de cache do Visual Studio
+.vs/
+
+# Pacotes do NuGet
+packages/
