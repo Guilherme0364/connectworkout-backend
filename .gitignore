@@ -15,3 +15,5 @@
 
 # Pacotes do NuGet
 packages/
+
+.claude
