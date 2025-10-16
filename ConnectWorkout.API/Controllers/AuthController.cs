@@ -20,7 +20,7 @@ namespace ConnectWorkout.API.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterUserDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto registerDto)
         {
             _logger.LogInformation("Register attempt for user with email: {Email}", registerDto.Email);
             
@@ -38,7 +38,7 @@ namespace ConnectWorkout.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
             _logger.LogInformation("Login attempt for user: {Email}", loginDto.Email);
             

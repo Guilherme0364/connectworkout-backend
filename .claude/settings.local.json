@@ -13,7 +13,10 @@
       "Bash(if [ -f \"FitnessApp.API.http\" ])",
       "Bash(then mv \"FitnessApp.API.http\" \"ConnectWorkout.API.http\")",
       "Bash(powershell.exe:*)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet run)",
+      "Bash(timeout /t 5 /nobreak)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

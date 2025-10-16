@@ -11,9 +11,30 @@ using System.Collections.Generic;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ========================================
+// 🔧 Server Binding Configuration
+// ========================================
+// Bind to all network interfaces (0.0.0.0) to accept connections from any source
+// This is critical for mobile/frontend connections from different hosts
+builder.WebHost.UseUrls("http://0.0.0.0:7009");
+
 // Add services to the container.
-builder.Services.AddControllers(); 
+builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
+
+// ========================================
+// 🌐 CORS Configuration for React Native/Expo
+// ========================================
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactNative", policy =>
+    {
+        policy
+            .AllowAnyOrigin()      // Allows requests from any origin (mobile devices, emulators, etc.)
+            .AllowAnyMethod()      // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
+            .AllowAnyHeader();     // Allows all headers
+    });
+});
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -98,14 +119,45 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
 }
-app.UseHttpsRedirection();
+
+// ========================================
+// 📝 Request Logging Middleware (for debugging)
+// ========================================
+app.Use(async (context, next) =>
+{
+    var origin = context.Request.Headers["Origin"].ToString();
+
+    Console.WriteLine("========================================");
+    Console.WriteLine($"🔥 INCOMING REQUEST");
+    Console.WriteLine($"   Method: {context.Request.Method}");
+    Console.WriteLine($"   Path: {context.Request.Path}");
+    Console.WriteLine($"   Origin: {origin}");
+    Console.WriteLine($"   Content-Type: {context.Request.ContentType}");
+    Console.WriteLine($"   Host: {context.Request.Host}");
+    Console.WriteLine("========================================");
+
+    await next();
+
+    Console.WriteLine($"📤 Response Status: {context.Response.StatusCode}");
+    Console.WriteLine($"   CORS Header: {context.Response.Headers["Access-Control-Allow-Origin"]}");
+    Console.WriteLine("========================================\n");
+});
+
+// IMPORTANT: CORS must come BEFORE other middleware
+app.UseCors("AllowReactNative");
+
+// Comment out HTTPS redirection for mobile development
+// app.UseHttpsRedirection();
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.UseRouting(); // Opcional, mas recomendado
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllers(); // Adicionado mapeamento de controladores
+app.MapControllers();
+
+Console.WriteLine("🚀 Server is ready to accept requests from React Native/Expo");
+Console.WriteLine("📱 Make sure your mobile device/emulator can reach this server");
 
 app.Run();
