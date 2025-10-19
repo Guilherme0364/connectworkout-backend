@@ -158,6 +158,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 Console.WriteLine("🚀 Server is ready to accept requests from React Native/Expo");
-Console.WriteLine("📱 Make sure your mobile device/emulator can reach this server");
 
 app.Run();

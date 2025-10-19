@@ -169,6 +169,7 @@ namespace ConnectWorkout.API.Controllers
                 };
 
                 await _workoutRepository.AddAsync(workout);
+                await _workoutRepository.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetWorkoutDetails), new { workoutId = workout.Id }, new { id = workout.Id, name = workout.Name });
             }
@@ -208,6 +209,7 @@ namespace ConnectWorkout.API.Controllers
                 }
 
                 await _workoutRepository.UpdateAsync(workout);
+                await _workoutRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Workout updated successfully" });
             }
@@ -236,6 +238,7 @@ namespace ConnectWorkout.API.Controllers
                 }
 
                 await _workoutRepository.DeleteAsync(workout);
+                await _workoutRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Workout deleted successfully" });
             }
@@ -282,6 +285,7 @@ namespace ConnectWorkout.API.Controllers
                 };
 
                 await _workoutDayRepository.AddAsync(workoutDay);
+                await _workoutDayRepository.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetWorkoutDetails), new { workoutId }, new { id = workoutDay.Id, dayOfWeek = workoutDay.DayOfWeek });
             }
@@ -311,6 +315,7 @@ namespace ConnectWorkout.API.Controllers
                 }
 
                 await _workoutDayRepository.DeleteAsync(workoutDay);
+                await _workoutDayRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Workout day deleted successfully" });
             }
@@ -366,6 +371,7 @@ namespace ConnectWorkout.API.Controllers
                 };
 
                 await _exerciseRepository.AddAsync(exercise);
+                await _exerciseRepository.SaveChangesAsync();
 
                 return CreatedAtAction(nameof(GetWorkoutDetails), new { workoutId }, new { id = exercise.Id, name = exercise.Name });
             }
@@ -413,6 +419,7 @@ namespace ConnectWorkout.API.Controllers
                     exercise.Notes = dto.Notes ?? string.Empty;
 
                 await _exerciseRepository.UpdateAsync(exercise);
+                await _exerciseRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Exercise updated successfully" });
             }
@@ -443,6 +450,7 @@ namespace ConnectWorkout.API.Controllers
                 }
 
                 await _exerciseRepository.DeleteAsync(exercise);
+                await _exerciseRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Exercise deleted successfully" });
             }
@@ -473,6 +481,7 @@ namespace ConnectWorkout.API.Controllers
                 }
 
                 await _exerciseRepository.ReorderExercisesAsync(dto.ExerciseIds);
+                await _exerciseRepository.SaveChangesAsync();
 
                 return Ok(new { message = "Exercises reordered successfully" });
             }
