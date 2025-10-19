@@ -22,6 +22,7 @@ namespace ConnectWorkout.Infrastructure.Repositories
         {
             return await _dbSet
                 .Where(e => e.WorkoutDayId == workoutDayId)
+                .OrderBy(e => e.Order)
                 .ToListAsync();
         }
 
@@ -36,16 +37,29 @@ namespace ConnectWorkout.Infrastructure.Repositories
         {
             // Obter o dia da semana atual
             DayOfWeek today = DateTime.Now.DayOfWeek;
-            
+
             // Buscar os exercícios do treino ativo do aluno para o dia de hoje
             return await _context.Exercises
                 .Include(e => e.WorkoutDay)
                     .ThenInclude(wd => wd.Workout)
-                .Where(e => 
-                    e.WorkoutDay.Workout.StudentId == studentId && 
-                    e.WorkoutDay.Workout.IsActive && 
+                .Where(e =>
+                    e.WorkoutDay.Workout.StudentId == studentId &&
+                    e.WorkoutDay.Workout.IsActive &&
                     e.WorkoutDay.DayOfWeek == today)
                 .ToListAsync();
+        }
+
+        public async Task ReorderExercisesAsync(List<int> exerciseIds)
+        {
+            for (int i = 0; i < exerciseIds.Count; i++)
+            {
+                var exercise = await _dbSet.FindAsync(exerciseIds[i]);
+                if (exercise != null)
+                {
+                    exercise.Order = i;
+                }
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

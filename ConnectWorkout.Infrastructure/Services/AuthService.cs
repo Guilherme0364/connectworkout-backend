@@ -51,6 +51,10 @@ namespace ConnectWorkout.Infrastructure.Services
                 Gender = registerDto.Gender,
                 UserType = registerDto.UserType,
                 Description = registerDto.Description ?? string.Empty,
+                BodyType = string.Empty,
+                HealthConditions = string.Empty,
+                Goal = string.Empty,
+                Observations = string.Empty,
                 // Inicializar coleções vazias
                 InstructorsRelations = new List<StudentInstructor>(),
                 StudentsRelations = new List<StudentInstructor>(),

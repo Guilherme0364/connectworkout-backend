@@ -23,5 +23,10 @@ namespace ConnectWorkout.Core.Interfaces
         /// Obtém os exercícios programados para um aluno no dia de hoje
         /// </summary>
         Task<IEnumerable<Exercise>> GetExercisesForStudentTodayAsync(int studentId);
+
+        /// <summary>
+        /// Reordena os exercícios de um dia de treino
+        /// </summary>
+        Task ReorderExercisesAsync(List<int> exerciseIds);
     }
 }

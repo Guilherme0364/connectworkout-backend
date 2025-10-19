@@ -15,11 +15,16 @@ namespace ConnectWorkout.Infrastructure.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IStudentInstructorRepository _studentInstructorRepository;
         private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
+        public UserService(
+            IUserRepository userRepository,
+            IStudentInstructorRepository studentInstructorRepository,
+            ILogger<UserService> logger)
         {
             _userRepository = userRepository;
+            _studentInstructorRepository = studentInstructorRepository;
             _logger = logger;
         }
 
@@ -100,6 +105,114 @@ namespace ConnectWorkout.Infrastructure.Services
             return pagedUsers.Select(MapToUserDto);
         }
         
+        public async Task<UserDto> GetStudentProfileAsync(int userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+
+            if (user == null)
+            {
+                _logger.LogWarning("Student with ID {UserId} not found", userId);
+                return null;
+            }
+
+            // Verificar se é realmente um estudante
+            if (user.UserType != Core.Enums.UserType.Student)
+            {
+                _logger.LogWarning("User with ID {UserId} is not a student", userId);
+                return null;
+            }
+
+            return MapToUserDto(user);
+        }
+
+        public async Task<InstructorSummaryDto> GetStudentInstructorAsync(int studentId)
+        {
+            try
+            {
+                // Buscar a relação ativa entre estudante e instrutor
+                var relationships = await _studentInstructorRepository.FindAsync(
+                    si => si.StudentId == studentId);
+
+                var activeRelationship = relationships.FirstOrDefault();
+
+                if (activeRelationship == null)
+                {
+                    _logger.LogInformation("No instructor found for student {StudentId}", studentId);
+                    return null;
+                }
+
+                // Buscar informações do instrutor
+                var instructor = await _userRepository.GetByIdAsync(activeRelationship.InstructorId);
+
+                if (instructor == null)
+                {
+                    _logger.LogWarning("Instructor with ID {InstructorId} not found", activeRelationship.InstructorId);
+                    return null;
+                }
+
+                return new InstructorSummaryDto
+                {
+                    Id = instructor.Id,
+                    Name = instructor.Name,
+                    Email = instructor.Email,
+                    Description = instructor.Description
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting instructor for student {StudentId}", studentId);
+                throw;
+            }
+        }
+
+        public async Task<UserDto> UpdateStudentProfileAsync(int userId, UpdateStudentProfileDto updateDto)
+        {
+            try
+            {
+                // Get user from database
+                var user = await _userRepository.GetByIdAsync(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User with ID {UserId} not found for profile update", userId);
+                    return null;
+                }
+
+                // Verify user is a student
+                if (user.UserType != Core.Enums.UserType.Student)
+                {
+                    _logger.LogWarning("User {UserId} is not a student, cannot update student profile", userId);
+                    return null;
+                }
+
+                // Update user fields
+                user.Name = updateDto.Name;
+                user.Description = string.Empty; // Students don't have a description field in the profile update DTO
+                user.Gender = updateDto.Gender;
+                user.Age = updateDto.Age;
+                user.Height = updateDto.Height;
+                user.Weight = updateDto.Weight;
+                user.BodyType = updateDto.BodyType ?? string.Empty;
+                user.HealthConditions = updateDto.HealthConditions ?? string.Empty;
+                user.Goal = updateDto.Goal ?? string.Empty;
+                user.Observations = updateDto.Observations ?? string.Empty;
+
+                // Save to database
+                await _userRepository.UpdateAsync(user);
+                await _userRepository.SaveChangesAsync();
+
+                _logger.LogInformation("Student profile updated successfully for user {UserId}", userId);
+
+                // Return updated profile
+                return MapToUserDto(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating student profile for user {UserId}", userId);
+                throw;
+            }
+        }
+
         // Método para mapear User para UserDto
         private UserDto MapToUserDto(User user)
         {
@@ -111,7 +224,13 @@ namespace ConnectWorkout.Infrastructure.Services
                 Age = user.Age,
                 Gender = user.Gender,
                 UserType = user.UserType,
-                Description = user.Description
+                Description = user.Description,
+                Height = user.Height,
+                Weight = user.Weight,
+                BodyType = user.BodyType,
+                HealthConditions = user.HealthConditions,
+                Goal = user.Goal,
+                Observations = user.Observations
             };
         }
     }

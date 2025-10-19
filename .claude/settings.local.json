@@ -16,7 +16,16 @@
       "Bash(dotnet build:*)",
       "Bash(dotnet run)",
       "Bash(timeout /t 5 /nobreak)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(timeout:*)",
+      "Bash(dotnet ef --version)",
+      "Bash(dotnet tool install --global dotnet-ef)",
+      "Bash(dotnet ef migrations add AddExerciseMetadata --startup-project ../ConnectWorkout.API)",
+      "Bash(dotnet ef database update --startup-project ../ConnectWorkout.API)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :7009)",
+      "Bash(taskkill /F /PID 25648)",
+      "Bash(git add .)"
     ],
     "deny": [],
     "ask": []

@@ -14,6 +14,15 @@ namespace ConnectWorkout.Core.DTOs
     }
     
     /// <summary>
+    /// DTO para atualizar uma ficha de treino
+    /// </summary>
+    public class UpdateWorkoutDto
+    {
+        public string Name { get; set; }
+        public bool? IsActive { get; set; }
+    }
+
+    /// <summary>
     /// DTO para adicionar um dia de treino
     /// </summary>
     public class AddWorkoutDayDto
@@ -27,11 +36,37 @@ namespace ConnectWorkout.Core.DTOs
     public class AddExerciseDto
     {
         public string ExerciseDbId { get; set; }
+        public string Name { get; set; }
+        public string BodyPart { get; set; }
+        public string Equipment { get; set; }
+        public string GifUrl { get; set; }
         public string Sets { get; set; }
         public string Repetitions { get; set; }
+        public decimal? Weight { get; set; }
+        public int? RestSeconds { get; set; }
         public string Notes { get; set; }
     }
     
+    /// <summary>
+    /// DTO para atualizar um exercício
+    /// </summary>
+    public class UpdateExerciseDto
+    {
+        public string Sets { get; set; }
+        public string Repetitions { get; set; }
+        public decimal? Weight { get; set; }
+        public int? RestSeconds { get; set; }
+        public string Notes { get; set; }
+    }
+
+    /// <summary>
+    /// DTO para reordenar exercícios
+    /// </summary>
+    public class ReorderExercisesDto
+    {
+        public List<int> ExerciseIds { get; set; }
+    }
+
     /// <summary>
     /// DTO para exibir um exercício com detalhes da API ExerciseDB
     /// </summary>
@@ -46,6 +81,9 @@ namespace ConnectWorkout.Core.DTOs
         public string GifUrl { get; set; }
         public string Sets { get; set; }
         public string Repetitions { get; set; }
+        public decimal? Weight { get; set; }
+        public int? RestSeconds { get; set; }
+        public int Order { get; set; }
         public string Notes { get; set; }
         public StatusType? Status { get; set; }
     }

@@ -49,6 +49,12 @@ namespace ConnectWorkout.Core.DTOs
         public Gender? Gender { get; set; }
         public UserType UserType { get; set; }
         public string Description { get; set; }
+        public decimal? Height { get; set; }
+        public decimal? Weight { get; set; }
+        public string BodyType { get; set; }
+        public string HealthConditions { get; set; }
+        public string Goal { get; set; }
+        public string Observations { get; set; }
     }
     
     /// <summary>

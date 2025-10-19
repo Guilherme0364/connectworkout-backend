@@ -44,42 +44,61 @@ namespace ConnectWorkout.Infrastructure.Services
                 _logger.LogWarning("Instructor with ID {InstructorId} not found", instructorId);
                 return false;
             }
-            
-            // Verificar se o aluno existe
-            var student = await _userRepository.GetByIdAsync(connectDto.StudentId);
-            if (student == null || student.UserType != UserType.Student)
+
+            // Validar que ao menos StudentId ou Email foi fornecido
+            if (!connectDto.StudentId.HasValue && string.IsNullOrWhiteSpace(connectDto.Email))
             {
-                _logger.LogWarning("Student with ID {StudentId} not found", connectDto.StudentId);
+                _logger.LogWarning("Neither StudentId nor Email provided in ConnectStudentDto");
                 return false;
             }
-            
+
+            // Buscar aluno por ID ou Email
+            User student = null;
+
+            if (connectDto.StudentId.HasValue)
+            {
+                student = await _userRepository.GetByIdAsync(connectDto.StudentId.Value);
+            }
+            else if (!string.IsNullOrWhiteSpace(connectDto.Email))
+            {
+                student = await _userRepository.GetByEmailAsync(connectDto.Email);
+            }
+
+            // Verificar se o aluno existe e é realmente um estudante
+            if (student == null || student.UserType != UserType.Student)
+            {
+                _logger.LogWarning("Student not found or user is not a student. StudentId: {StudentId}, Email: {Email}",
+                    connectDto.StudentId, connectDto.Email);
+                return false;
+            }
+
             // Verificar se já existe conexão
             bool connectionExists = await _studentInstructorRepository.ConnectionExistsAsync(
-                connectDto.StudentId, instructorId);
-                
+                student.Id, instructorId);
+
             if (connectionExists)
             {
                 _logger.LogInformation(
                     "Connection between instructor {InstructorId} and student {StudentId} already exists",
-                    instructorId, connectDto.StudentId);
+                    instructorId, student.Id);
                 return true; // Já está conectado
             }
-            
+
             // Criar nova conexão
             var connection = new StudentInstructor
             {
-                StudentId = connectDto.StudentId,
+                StudentId = student.Id,
                 InstructorId = instructorId,
                 ConnectedAt = DateTime.UtcNow
             };
-            
+
             await _studentInstructorRepository.AddAsync(connection);
             await _studentInstructorRepository.SaveChangesAsync();
-            
+
             _logger.LogInformation(
                 "Connection created between instructor {InstructorId} and student {StudentId}",
-                instructorId, connectDto.StudentId);
-                
+                instructorId, student.Id);
+
             return true;
         }
 

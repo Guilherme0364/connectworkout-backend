@@ -117,21 +117,45 @@ namespace ConnectWorkout.Infrastructure.Data
             modelBuilder.Entity<Exercise>(entity =>
             {
                 entity.ToTable("Exercises");
-                
+
                 entity.HasKey(e => e.Id);
-                
+
                 entity.Property(e => e.ExerciseDbId)
                     .IsRequired()
                     .HasMaxLength(50);
-                
+
+                entity.Property(e => e.Name)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.BodyPart)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Equipment)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.GifUrl)
+                    .HasMaxLength(500);
+
                 entity.Property(e => e.Sets)
                     .IsRequired()
                     .HasMaxLength(20);
-                
+
                 entity.Property(e => e.Repetitions)
                     .IsRequired()
                     .HasMaxLength(20);
-                
+
+                entity.Property(e => e.Weight)
+                    .HasPrecision(6, 2); // Permite valores como 9999.99
+
+                entity.Property(e => e.RestSeconds);
+
+                entity.Property(e => e.Order)
+                    .IsRequired()
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Notes)
+                    .HasMaxLength(500);
+
                 // Configurando relação com WorkoutDay
                 entity.HasOne(e => e.WorkoutDay)
                     .WithMany(wd => wd.Exercises)

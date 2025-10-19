@@ -7,7 +7,16 @@ namespace ConnectWorkout.Core.DTOs
     /// </summary>
     public class ConnectStudentDto
     {
-        public int StudentId { get; set; }
+        /// <summary>
+        /// ID do aluno (opcional se Email for fornecido)
+        /// </summary>
+        public int? StudentId { get; set; }
+
+        /// <summary>
+        /// Email do aluno (opcional se StudentId for fornecido)
+        /// Ao menos um dos dois (StudentId ou Email) deve ser fornecido
+        /// </summary>
+        public string Email { get; set; }
     }
     
     /// <summary>

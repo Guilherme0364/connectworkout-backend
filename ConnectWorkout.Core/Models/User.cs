@@ -48,7 +48,37 @@ namespace ConnectWorkout.Core.Models
         /// Descrição ou biografia do usuário (opcional)
         /// </summary>
         public string Description { get; set; }
-        
+
+        /// <summary>
+        /// Altura do usuário em centímetros (opcional)
+        /// </summary>
+        public decimal? Height { get; set; }
+
+        /// <summary>
+        /// Peso do usuário em quilogramas (opcional)
+        /// </summary>
+        public decimal? Weight { get; set; }
+
+        /// <summary>
+        /// Tipo de corpo do usuário (opcional)
+        /// </summary>
+        public string BodyType { get; set; }
+
+        /// <summary>
+        /// Condições de saúde do usuário (opcional)
+        /// </summary>
+        public string HealthConditions { get; set; }
+
+        /// <summary>
+        /// Objetivo do aluno com os treinos (opcional)
+        /// </summary>
+        public string Goal { get; set; }
+
+        /// <summary>
+        /// Observações gerais sobre o aluno (opcional)
+        /// </summary>
+        public string Observations { get; set; }
+
         // Propriedades de navegação para relacionamentos
         
         /// <summary>
