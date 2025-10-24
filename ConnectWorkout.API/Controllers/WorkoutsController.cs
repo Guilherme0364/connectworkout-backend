@@ -181,6 +181,103 @@ namespace ConnectWorkout.API.Controllers
         }
 
         /// <summary>
+        /// Create a complete workout plan with days and exercises in one request
+        /// </summary>
+        /// <param name="dto">Complete workout data including days and exercises</param>
+        [HttpPost("bulk")]
+        public async Task<IActionResult> CreateWorkoutBulk([FromBody] CreateWorkoutBulkDto dto)
+        {
+            try
+            {
+                _logger.LogInformation("Creating bulk workout for student: {StudentId}", dto.StudentId);
+
+                // Verify student exists
+                var student = await _userRepository.GetByIdAsync(dto.StudentId);
+                if (student == null || student.UserType != UserType.Student)
+                {
+                    return BadRequest(new { message = "Invalid student ID" });
+                }
+
+                // Create the workout
+                var workout = new Workout
+                {
+                    StudentId = dto.StudentId,
+                    Name = dto.Name,
+                    CreatedAt = DateTime.UtcNow,
+                    IsActive = true
+                };
+
+                await _workoutRepository.AddAsync(workout);
+                await _workoutRepository.SaveChangesAsync();
+
+                // Create workout days with exercises
+                if (dto.WorkoutDays != null && dto.WorkoutDays.Any())
+                {
+                    foreach (var dayDto in dto.WorkoutDays)
+                    {
+                        // Check if day already exists (shouldn't happen in bulk creation, but safety check)
+                        var existingDay = await _workoutDayRepository.GetWorkoutDayByDayOfWeekAsync(workout.Id, dayDto.DayOfWeek);
+                        if (existingDay != null)
+                        {
+                            continue; // Skip duplicate days
+                        }
+
+                        var workoutDay = new WorkoutDay
+                        {
+                            WorkoutId = workout.Id,
+                            DayOfWeek = dayDto.DayOfWeek
+                        };
+
+                        await _workoutDayRepository.AddAsync(workoutDay);
+                        await _workoutDayRepository.SaveChangesAsync();
+
+                        // Add exercises to this day
+                        if (dayDto.Exercises != null && dayDto.Exercises.Any())
+                        {
+                            int order = 0;
+                            foreach (var exerciseDto in dayDto.Exercises)
+                            {
+                                var exercise = new Exercise
+                                {
+                                    WorkoutDayId = workoutDay.Id,
+                                    ExerciseDbId = exerciseDto.ExerciseDbId,
+                                    Name = exerciseDto.Name,
+                                    BodyPart = exerciseDto.BodyPart,
+                                    Equipment = exerciseDto.Equipment,
+                                    GifUrl = exerciseDto.GifUrl,
+                                    Sets = exerciseDto.Sets,
+                                    Repetitions = exerciseDto.Repetitions,
+                                    Weight = exerciseDto.Weight,
+                                    RestSeconds = exerciseDto.RestSeconds,
+                                    Order = order++,
+                                    Notes = exerciseDto.Notes ?? string.Empty
+                                };
+
+                                await _exerciseRepository.AddAsync(exercise);
+                            }
+                            await _exerciseRepository.SaveChangesAsync();
+                        }
+                    }
+                }
+
+                // Return the complete workout
+                var createdWorkout = await _workoutRepository.GetWorkoutWithDaysAndExercisesAsync(workout.Id);
+
+                return CreatedAtAction(nameof(GetWorkoutDetails), new { workoutId = workout.Id }, new
+                {
+                    id = workout.Id,
+                    name = workout.Name,
+                    message = "Workout created successfully with all days and exercises"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating bulk workout");
+                return StatusCode(500, new { message = "Error creating workout: " + ex.Message });
+            }
+        }
+
+        /// <summary>
         /// Update workout details
         /// </summary>
         /// <param name="workoutId">ID of the workout</param>

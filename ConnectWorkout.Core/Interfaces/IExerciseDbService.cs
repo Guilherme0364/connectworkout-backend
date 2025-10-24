@@ -23,6 +23,11 @@ namespace ConnectWorkout.Core.Interfaces
         /// Busca exercícios pelo nome
         /// </summary>
         Task<List<ExerciseDbModel>> SearchExercisesByNameAsync(string name);
+
+        /// <summary>
+        /// Busca exercícios com paginação e filtros combinados
+        /// </summary>
+        Task<List<ExerciseDbModel>> SearchExercisesAsync(string name = null, string bodyPart = null, string equipment = null, string target = null, int limit = 30, int offset = 0);
         
         /// <summary>
         /// Obtém exercícios por parte do corpo

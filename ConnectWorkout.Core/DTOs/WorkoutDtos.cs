@@ -12,6 +12,25 @@ namespace ConnectWorkout.Core.DTOs
         public string Name { get; set; }
         public int StudentId { get; set; }
     }
+
+    /// <summary>
+    /// DTO para criar uma ficha de treino completa com dias e exercícios
+    /// </summary>
+    public class CreateWorkoutBulkDto
+    {
+        public string Name { get; set; }
+        public int StudentId { get; set; }
+        public List<CreateWorkoutDayBulkDto> WorkoutDays { get; set; }
+    }
+
+    /// <summary>
+    /// DTO para criar um dia de treino com exercícios na criação em massa
+    /// </summary>
+    public class CreateWorkoutDayBulkDto
+    {
+        public DayOfWeek DayOfWeek { get; set; }
+        public List<AddExerciseDto> Exercises { get; set; }
+    }
     
     /// <summary>
     /// DTO para atualizar uma ficha de treino

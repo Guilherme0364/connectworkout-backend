@@ -21,15 +21,80 @@ namespace ConnectWorkout.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<IActionResult> SearchExercises(string name)
+        public async Task<IActionResult> SearchExercises(
+            [FromQuery] string name,
+            [FromQuery] int limit = 30,
+            [FromQuery] int offset = 0)
         {
             if (string.IsNullOrEmpty(name))
             {
                 return BadRequest(new { message = "O parâmetro de busca não pode ser vazio." });
             }
 
-            var exercises = await _exerciseDbService.SearchExercisesByNameAsync(name);
-            return Ok(exercises);
+            try
+            {
+                // Use the improved search with pagination
+                var exercises = await _exerciseDbService.SearchExercisesAsync(
+                    name: name,
+                    limit: limit,
+                    offset: offset
+                );
+
+                return Ok(new
+                {
+                    data = exercises,
+                    total = exercises.Count,
+                    limit = limit,
+                    offset = offset
+                });
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao buscar exercícios por nome {Name}", name);
+                return StatusCode(500, new { message = "Erro ao buscar exercícios." });
+            }
+        }
+
+        [HttpGet("filter")]
+        public async Task<IActionResult> FilterExercises(
+            [FromQuery] string name = null,
+            [FromQuery] string bodyPart = null,
+            [FromQuery] string equipment = null,
+            [FromQuery] string target = null,
+            [FromQuery] int limit = 30,
+            [FromQuery] int offset = 0)
+        {
+            try
+            {
+                var exercises = await _exerciseDbService.SearchExercisesAsync(
+                    name: name,
+                    bodyPart: bodyPart,
+                    equipment: equipment,
+                    target: target,
+                    limit: limit,
+                    offset: offset
+                );
+
+                return Ok(new
+                {
+                    data = exercises,
+                    total = exercises.Count,
+                    limit = limit,
+                    offset = offset,
+                    filters = new
+                    {
+                        name = name,
+                        bodyPart = bodyPart,
+                        equipment = equipment,
+                        target = target
+                    }
+                });
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao filtrar exercícios");
+                return StatusCode(500, new { message = "Erro ao filtrar exercícios." });
+            }
         }
 
         [HttpGet("{id}")]

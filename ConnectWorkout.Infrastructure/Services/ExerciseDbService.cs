@@ -69,9 +69,78 @@ namespace ConnectWorkout.Infrastructure.Services
         {
             // A API não suporta busca por nome diretamente, então buscamos todos e filtramos
             var allExercises = await GetAllExercisesAsync();
-            
-            return allExercises.FindAll(e => 
+
+            return allExercises.FindAll(e =>
                 e.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public async Task<List<ExerciseDbModel>> SearchExercisesAsync(
+            string name = null,
+            string bodyPart = null,
+            string equipment = null,
+            string target = null,
+            int limit = 30,
+            int offset = 0)
+        {
+            List<ExerciseDbModel> exercises;
+
+            // Start with the most specific filter if provided
+            if (!string.IsNullOrEmpty(bodyPart))
+            {
+                exercises = await GetExercisesByBodyPartAsync(bodyPart);
+            }
+            else if (!string.IsNullOrEmpty(equipment))
+            {
+                exercises = await GetExercisesByEquipmentAsync(equipment);
+            }
+            else if (!string.IsNullOrEmpty(target))
+            {
+                exercises = await GetExercisesByTargetAsync(target);
+            }
+            else
+            {
+                exercises = await GetAllExercisesAsync();
+            }
+
+            // Apply additional filters
+            if (!string.IsNullOrEmpty(name))
+            {
+                // Improved name search: split search term into words and match any word
+                var searchTerms = name.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                exercises = exercises.Where(e =>
+                {
+                    var exerciseName = e.Name.ToLower();
+                    // Match if ANY search term is found in the exercise name
+                    return searchTerms.Any(term => exerciseName.Contains(term));
+                }).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(equipment) && string.IsNullOrEmpty(bodyPart) && string.IsNullOrEmpty(target))
+            {
+                // Only apply this filter if we didn't already start with equipment filter
+            }
+            else if (!string.IsNullOrEmpty(equipment))
+            {
+                exercises = exercises.Where(e =>
+                    e.Equipment.Equals(equipment, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(target) && string.IsNullOrEmpty(bodyPart) && string.IsNullOrEmpty(equipment))
+            {
+                // Only apply this filter if we didn't already start with target filter
+            }
+            else if (!string.IsNullOrEmpty(target))
+            {
+                exercises = exercises.Where(e =>
+                    e.Target.Equals(target, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+
+            // Apply pagination
+            return exercises
+                .Skip(offset)
+                .Take(limit)
+                .ToList();
         }
 
         public async Task<List<ExerciseDbModel>> GetExercisesByBodyPartAsync(string bodyPart)
