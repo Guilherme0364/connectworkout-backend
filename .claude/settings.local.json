@@ -26,7 +26,8 @@
       "Bash(findstr :7009)",
       "Bash(taskkill /F /PID 25648)",
       "Bash(git add .)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: add student profile management, workout/exercise controllers, and coach-student connection by email\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: add student profile management, workout/exercise controllers, and coach-student connection by email\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(dir \"C:\\Users\\guilh\\Desktop\\TCC\\connectworkout-backend\")"
     ],
     "deny": [],
     "ask": []

@@ -18,16 +18,107 @@ namespace ConnectWorkout.API.Controllers
     {
         private readonly IUserService _userService;
         private readonly IWorkoutRepository _workoutRepository;
+        private readonly IStudentInstructorRepository _studentInstructorRepository;
         private readonly ILogger<StudentsController> _logger;
 
         public StudentsController(
             IUserService userService,
             IWorkoutRepository workoutRepository,
+            IStudentInstructorRepository studentInstructorRepository,
             ILogger<StudentsController> logger)
         {
             _userService = userService;
             _workoutRepository = workoutRepository;
+            _studentInstructorRepository = studentInstructorRepository;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Get student dashboard data with aggregated information
+        /// </summary>
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboard()
+        {
+            try
+            {
+                // Get user ID from JWT token
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new { message = "User not authenticated" });
+                }
+
+                var userId = int.Parse(userIdClaim.Value);
+
+                _logger.LogInformation("Getting dashboard data for student: {UserId}", userId);
+
+                // Get student info
+                var student = await _userService.GetUserByIdAsync(userId);
+                if (student == null || student.UserType != UserType.Student)
+                {
+                    return Forbid();
+                }
+
+                // Get most recent instructor (ordered by ConnectedAt DESC)
+                var instructorRelations = await _studentInstructorRepository.FindAsync(si => si.StudentId == userId);
+                var mostRecentRelation = instructorRelations.OrderByDescending(si => si.ConnectedAt).FirstOrDefault();
+
+                InstructorSummaryDto currentTrainer = null;
+                bool hasTrainer = false;
+
+                if (mostRecentRelation != null)
+                {
+                    hasTrainer = true;
+                    var instructor = await _userService.GetUserByIdAsync(mostRecentRelation.InstructorId);
+
+                    if (instructor != null)
+                    {
+                        // Count total students for this instructor
+                        var instructorStudents = await _studentInstructorRepository.FindAsync(si => si.InstructorId == instructor.Id);
+                        var studentCount = instructorStudents.Count();
+
+                        currentTrainer = new InstructorSummaryDto
+                        {
+                            Id = instructor.Id,
+                            Name = instructor.Name,
+                            Email = instructor.Email,
+                            Description = instructor.Description,
+                            StudentCount = studentCount
+                        };
+                    }
+                }
+
+                // Get workout count and active workout
+                var workouts = await _workoutRepository.GetWorkoutsByStudentIdAsync(userId);
+                var workoutCount = workouts.Count();
+
+                // Get most recent active workout (ordered by CreatedAt DESC)
+                var activeWorkout = workouts
+                    .Where(w => w.IsActive)
+                    .OrderByDescending(w => w.CreatedAt)
+                    .FirstOrDefault();
+
+                var activeWorkoutId = activeWorkout?.Id;
+
+                // Build dashboard DTO
+                var dashboard = new StudentDashboardDto
+                {
+                    StudentName = student.Name,
+                    HasTrainer = hasTrainer,
+                    CurrentTrainer = currentTrainer,
+                    WorkoutCount = workoutCount,
+                    ActiveWorkoutId = activeWorkoutId,
+                    PendingRequestsCount = 0 // Not implemented yet
+                };
+
+                return Ok(dashboard);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting student dashboard");
+                return StatusCode(500, new { message = "Error retrieving dashboard data" });
+            }
         }
 
         /// <summary>
