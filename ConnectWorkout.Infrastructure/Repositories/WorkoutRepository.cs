@@ -20,6 +20,8 @@ namespace ConnectWorkout.Infrastructure.Repositories
         public async Task<IEnumerable<Workout>> GetWorkoutsByStudentIdAsync(int studentId)
         {
             return await _dbSet
+                .Include(w => w.WorkoutDays)
+                    .ThenInclude(wd => wd.Exercises)
                 .Where(w => w.StudentId == studentId)
                 .OrderByDescending(w => w.CreatedAt)
                 .ToListAsync();

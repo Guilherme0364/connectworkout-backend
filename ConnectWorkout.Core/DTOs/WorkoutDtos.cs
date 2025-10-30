@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using ConnectWorkout.Core.Enums;
 
 namespace ConnectWorkout.Core.DTOs
@@ -54,15 +55,40 @@ namespace ConnectWorkout.Core.DTOs
     /// </summary>
     public class AddExerciseDto
     {
+        [Required(ErrorMessage = "ExerciseDbId is required")]
         public string ExerciseDbId { get; set; }
+
+        [Required(ErrorMessage = "Exercise name is required")]
+        [StringLength(200, ErrorMessage = "Exercise name cannot exceed 200 characters")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "BodyPart is required (e.g., 'chest', 'back', 'legs')")]
+        [StringLength(100, ErrorMessage = "BodyPart cannot exceed 100 characters")]
         public string BodyPart { get; set; }
+
+        [Required(ErrorMessage = "Equipment is required (e.g., 'barbell', 'dumbbell', 'body weight')")]
+        [StringLength(100, ErrorMessage = "Equipment cannot exceed 100 characters")]
         public string Equipment { get; set; }
+
+        [Required(ErrorMessage = "GifUrl is required")]
+        [Url(ErrorMessage = "GifUrl must be a valid URL")]
         public string GifUrl { get; set; }
+
+        [Required(ErrorMessage = "Sets is required (e.g., '3', '4')")]
+        [StringLength(20, ErrorMessage = "Sets cannot exceed 20 characters")]
         public string Sets { get; set; }
+
+        [Required(ErrorMessage = "Repetitions is required (e.g., '10', '12', '8-12')")]
+        [StringLength(20, ErrorMessage = "Repetitions cannot exceed 20 characters")]
         public string Repetitions { get; set; }
+
+        [Range(0, double.MaxValue, ErrorMessage = "Weight must be a positive number")]
         public decimal? Weight { get; set; }
+
+        [Range(0, int.MaxValue, ErrorMessage = "RestSeconds must be a positive number")]
         public int? RestSeconds { get; set; }
+
+        [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
         public string Notes { get; set; }
     }
     

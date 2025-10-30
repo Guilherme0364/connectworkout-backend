@@ -135,6 +135,47 @@ app.Use(async (context, next) =>
     Console.WriteLine($"   Origin: {origin}");
     Console.WriteLine($"   Content-Type: {context.Request.ContentType}");
     Console.WriteLine($"   Host: {context.Request.Host}");
+
+    // Log request body for POST/PUT requests
+    if (context.Request.Method == "POST" || context.Request.Method == "PUT")
+    {
+        context.Request.EnableBuffering(); // Allow reading body multiple times
+
+        using (var reader = new StreamReader(
+            context.Request.Body,
+            encoding: System.Text.Encoding.UTF8,
+            detectEncodingFromByteOrderMarks: false,
+            leaveOpen: true))
+        {
+            var body = await reader.ReadToEndAsync();
+            context.Request.Body.Position = 0; // Reset position for next middleware
+
+            if (!string.IsNullOrWhiteSpace(body))
+            {
+                Console.WriteLine($"   📦 Request Body:");
+                // Pretty print JSON if possible
+                try
+                {
+                    var jsonDoc = System.Text.Json.JsonDocument.Parse(body);
+                    var prettyJson = System.Text.Json.JsonSerializer.Serialize(
+                        jsonDoc.RootElement,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
+                    );
+                    Console.WriteLine(prettyJson);
+                }
+                catch
+                {
+                    // If not valid JSON, just print raw
+                    Console.WriteLine(body);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"   📦 Request Body: (empty)");
+            }
+        }
+    }
+
     Console.WriteLine("========================================");
 
     await next();

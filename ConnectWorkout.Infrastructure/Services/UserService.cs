@@ -16,15 +16,18 @@ namespace ConnectWorkout.Infrastructure.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IStudentInstructorRepository _studentInstructorRepository;
+        private readonly IWorkoutRepository _workoutRepository;
         private readonly ILogger<UserService> _logger;
 
         public UserService(
             IUserRepository userRepository,
             IStudentInstructorRepository studentInstructorRepository,
+            IWorkoutRepository workoutRepository,
             ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _studentInstructorRepository = studentInstructorRepository;
+            _workoutRepository = workoutRepository;
             _logger = logger;
         }
 
@@ -122,7 +125,14 @@ namespace ConnectWorkout.Infrastructure.Services
                 return null;
             }
 
-            return MapToUserDto(user);
+            // Calculate total exercises count across all workouts
+            var workouts = await _workoutRepository.GetWorkoutsByStudentIdAsync(userId);
+            var totalExercisesCount = workouts
+                .SelectMany(w => w.WorkoutDays ?? Enumerable.Empty<WorkoutDay>())
+                .SelectMany(wd => wd.Exercises ?? Enumerable.Empty<Exercise>())
+                .Count();
+
+            return MapToUserDto(user, totalExercisesCount);
         }
 
         public async Task<InstructorSummaryDto> GetStudentInstructorAsync(int studentId)
@@ -214,7 +224,7 @@ namespace ConnectWorkout.Infrastructure.Services
         }
 
         // Método para mapear User para UserDto
-        private UserDto MapToUserDto(User user)
+        private UserDto MapToUserDto(User user, int totalExercisesCount = 0)
         {
             return new UserDto
             {
@@ -230,7 +240,8 @@ namespace ConnectWorkout.Infrastructure.Services
                 BodyType = user.BodyType,
                 HealthConditions = user.HealthConditions,
                 Goal = user.Goal,
-                Observations = user.Observations
+                Observations = user.Observations,
+                TotalExercisesCount = totalExercisesCount
             };
         }
     }

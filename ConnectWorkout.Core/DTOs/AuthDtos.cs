@@ -55,6 +55,7 @@ namespace ConnectWorkout.Core.DTOs
         public string HealthConditions { get; set; }
         public string Goal { get; set; }
         public string Observations { get; set; }
+        public int TotalExercisesCount { get; set; }
     }
     
     /// <summary>

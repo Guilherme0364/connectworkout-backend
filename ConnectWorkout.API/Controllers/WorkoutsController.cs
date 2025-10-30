@@ -8,6 +8,7 @@ using ConnectWorkout.Core.Interfaces;
 using ConnectWorkout.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ConnectWorkout.API.Controllers
@@ -438,11 +439,55 @@ namespace ConnectWorkout.API.Controllers
         {
             try
             {
-                _logger.LogInformation("Adding exercise to day {DayId} of workout {WorkoutId}", dayId, workoutId);
+                // Detailed logging of incoming request
+                _logger.LogInformation("========== ADD EXERCISE REQUEST ==========");
+                _logger.LogInformation("WorkoutId: {WorkoutId}, DayId: {DayId}", workoutId, dayId);
+                _logger.LogInformation("DTO Values:");
+                _logger.LogInformation("  ExerciseDbId: {ExerciseDbId}", dto?.ExerciseDbId ?? "NULL");
+                _logger.LogInformation("  Name: {Name}", dto?.Name ?? "NULL");
+                _logger.LogInformation("  BodyPart: {BodyPart}", dto?.BodyPart ?? "NULL");
+                _logger.LogInformation("  Equipment: {Equipment}", dto?.Equipment ?? "NULL");
+                _logger.LogInformation("  GifUrl: {GifUrl}", dto?.GifUrl ?? "NULL");
+                _logger.LogInformation("  Sets: {Sets}", dto?.Sets ?? "NULL");
+                _logger.LogInformation("  Repetitions: {Repetitions}", dto?.Repetitions ?? "NULL");
+                _logger.LogInformation("  Weight: {Weight}", dto?.Weight?.ToString() ?? "NULL");
+                _logger.LogInformation("  RestSeconds: {RestSeconds}", dto?.RestSeconds?.ToString() ?? "NULL");
+                _logger.LogInformation("  Notes: {Notes}", dto?.Notes ?? "NULL");
+
+                // Check if DTO is null
+                if (dto == null)
+                {
+                    _logger.LogError("DTO is null - JSON deserialization failed");
+                    return BadRequest(new { message = "Request body is empty or invalid" });
+                }
+
+                // Validate ModelState
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Model validation failed");
+                    var errors = ModelState
+                        .Where(e => e.Value.Errors.Count > 0)
+                        .ToDictionary(
+                            e => e.Key,
+                            e => e.Value.Errors.Select(x => x.ErrorMessage).ToArray()
+                        );
+
+                    foreach (var error in errors)
+                    {
+                        _logger.LogError("  {Key}: {Errors}", error.Key, string.Join(", ", error.Value));
+                    }
+
+                    return BadRequest(new
+                    {
+                        message = "One or more validation errors occurred",
+                        errors = errors
+                    });
+                }
 
                 var workoutDay = await _workoutDayRepository.GetWorkoutDayWithExercisesAsync(dayId);
                 if (workoutDay == null || workoutDay.WorkoutId != workoutId)
                 {
+                    _logger.LogError("Workout day not found: DayId={DayId}, WorkoutId={WorkoutId}", dayId, workoutId);
                     return NotFound(new { message = "Workout day not found" });
                 }
 
@@ -451,6 +496,7 @@ namespace ConnectWorkout.API.Controllers
                     ? workoutDay.Exercises.Max(e => e.Order) + 1
                     : 0;
 
+                // Apply default values for optional fields
                 var exercise = new Exercise
                 {
                     WorkoutDayId = dayId,
@@ -461,21 +507,33 @@ namespace ConnectWorkout.API.Controllers
                     GifUrl = dto.GifUrl,
                     Sets = dto.Sets,
                     Repetitions = dto.Repetitions,
-                    Weight = dto.Weight,
-                    RestSeconds = dto.RestSeconds,
+                    Weight = dto.Weight ?? 0,  // Default to 0 if null
+                    RestSeconds = dto.RestSeconds ?? 0,  // Default to 0 if null
                     Order = nextOrder,
-                    Notes = dto.Notes ?? string.Empty
+                    Notes = dto.Notes ?? string.Empty  // Default to empty string if null
                 };
 
+                _logger.LogInformation("Saving exercise to database...");
                 await _exerciseRepository.AddAsync(exercise);
                 await _exerciseRepository.SaveChangesAsync();
 
+                _logger.LogInformation("Exercise saved successfully with ID: {ExerciseId}", exercise.Id);
+                _logger.LogInformation("==========================================");
+
                 return CreatedAtAction(nameof(GetWorkoutDetails), new { workoutId }, new { id = exercise.Id, name = exercise.Name });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "Database update failed: {Message}", dbEx.InnerException?.Message ?? dbEx.Message);
+                return BadRequest(new {
+                    message = "Database error",
+                    detail = dbEx.InnerException?.Message ?? dbEx.Message
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error adding exercise to workout day {DayId}", dayId);
-                return StatusCode(500, new { message = "Error adding exercise" });
+                return StatusCode(500, new { message = "Error adding exercise", detail = ex.Message });
             }
         }
 
