@@ -79,6 +79,47 @@ namespace ConnectWorkout.Core.Models
         /// </summary>
         public string Observations { get; set; }
 
+        /// <summary>
+        /// Número de telefone do usuário (opcional)
+        /// </summary>
+        public string? Phone { get; set; }
+
+        /// <summary>
+        /// Certificações do instrutor (JSON ou string separada por vírgulas) (opcional)
+        /// </summary>
+        public string? Certifications { get; set; }
+
+        /// <summary>
+        /// Especializações do instrutor (JSON ou string separada por vírgulas) (opcional)
+        /// </summary>
+        public string? Specializations { get; set; }
+
+        /// <summary>
+        /// Biografia detalhada do usuário (opcional, separada de Description)
+        /// </summary>
+        public string? Bio { get; set; }
+
+        /// <summary>
+        /// Anos de experiência do instrutor (opcional)
+        /// </summary>
+        public int? YearsOfExperience { get; set; }
+
+        /// <summary>
+        /// Links de redes sociais em formato JSON (opcional)
+        /// Ex: {"instagram":"@user","facebook":"profile","website":"url"}
+        /// </summary>
+        public string? SocialLinksJson { get; set; }
+
+        /// <summary>
+        /// Data de criação do registro
+        /// </summary>
+        public DateTime CreatedAt { get; set; }
+
+        /// <summary>
+        /// Data da última atualização do registro
+        /// </summary>
+        public DateTime UpdatedAt { get; set; }
+
         // Propriedades de navegação para relacionamentos
         
         /// <summary>

@@ -124,13 +124,41 @@ namespace ConnectWorkout.API.Controllers
             }
 
             var result = await _instructorService.RemoveStudentAsync(instructorId, studentId);
-            
+
             if (!result)
             {
                 return NotFound(new { message = "Aluno não encontrado ou não está vinculado a este instrutor." });
             }
 
             return Ok(new { message = "Aluno removido com sucesso." });
+        }
+
+        [HttpGet("statistics")]
+        public async Task<IActionResult> GetStatistics([FromQuery] string period = "month")
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Usuário não autenticado." });
+            }
+
+            var instructorId = int.Parse(userIdClaim.Value);
+
+            // Verificar se o usuário é um instrutor
+            var user = await _userService.GetUserByIdAsync(instructorId);
+            if (user == null || user.UserType != UserType.Instructor)
+            {
+                return Forbid();
+            }
+
+            var statistics = await _instructorService.GetInstructorStatisticsAsync(instructorId, period);
+
+            if (statistics == null)
+            {
+                return NotFound(new { message = "Não foi possível obter as estatísticas." });
+            }
+
+            return Ok(statistics);
         }
     }
 }

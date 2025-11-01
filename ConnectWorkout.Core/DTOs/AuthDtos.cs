@@ -1,7 +1,17 @@
+using System;
 using ConnectWorkout.Core.Enums;
 
 namespace ConnectWorkout.Core.DTOs
 {
+    /// <summary>
+    /// DTO para links de redes sociais
+    /// </summary>
+    public class SocialLinksDto
+    {
+        public string? Instagram { get; set; }
+        public string? Facebook { get; set; }
+        public string? Website { get; set; }
+    }
     /// <summary>
     /// DTO para registro de um novo usuário
     /// </summary>
@@ -56,6 +66,16 @@ namespace ConnectWorkout.Core.DTOs
         public string Goal { get; set; }
         public string Observations { get; set; }
         public int TotalExercisesCount { get; set; }
+
+        // New profile fields
+        public string? Phone { get; set; }
+        public string? Certifications { get; set; }
+        public string? Specializations { get; set; }
+        public string? Bio { get; set; }
+        public int? YearsOfExperience { get; set; }
+        public SocialLinksDto? SocialLinks { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
     
     /// <summary>
@@ -67,7 +87,15 @@ namespace ConnectWorkout.Core.DTOs
     public int? Age { get; set; }
     public Gender? Gender { get; set; }
     public string? Description { get; set; }
-    public string CurrentPassword { get; set; } // Tornando opcional
+    public string? CurrentPassword { get; set; } // Tornando opcional
     public string? NewPassword { get; set; } // Tornando opcional
+
+    // New profile fields
+    public string? Phone { get; set; }
+    public string? Certifications { get; set; }
+    public string? Specializations { get; set; }
+    public string? Bio { get; set; }
+    public int? YearsOfExperience { get; set; }
+    public SocialLinksDto? SocialLinks { get; set; }
     }
 }

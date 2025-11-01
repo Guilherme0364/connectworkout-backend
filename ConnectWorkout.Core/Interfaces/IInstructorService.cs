@@ -28,5 +28,10 @@ namespace ConnectWorkout.Core.Interfaces
         /// Obtém informações detalhadas de um aluno específico
         /// </summary>
         Task<StudentSummaryDto> GetStudentDetailsAsync(int instructorId, int studentId);
+
+        /// <summary>
+        /// Obtém estatísticas do instrutor
+        /// </summary>
+        Task<InstructorStatisticsDto> GetInstructorStatisticsAsync(int instructorId, string period = "month");
     }
 }

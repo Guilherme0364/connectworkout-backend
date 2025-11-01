@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ConnectWorkout.Core.DTOs;
 using ConnectWorkout.Core.Interfaces;
@@ -57,16 +58,41 @@ namespace ConnectWorkout.Infrastructure.Services
             // Atualizar informações básicas
             if (!string.IsNullOrEmpty(updateDto.Name))
                 user.Name = updateDto.Name;
-                
+
             if (updateDto.Age.HasValue)
                 user.Age = updateDto.Age;
-                
+
             if (updateDto.Gender.HasValue)
                 user.Gender = updateDto.Gender;
-                
+
             if (!string.IsNullOrEmpty(updateDto.Description))
                 user.Description = updateDto.Description;
-            
+
+            // Atualizar novos campos de perfil
+            if (!string.IsNullOrEmpty(updateDto.Phone))
+                user.Phone = updateDto.Phone;
+
+            if (!string.IsNullOrEmpty(updateDto.Certifications))
+                user.Certifications = updateDto.Certifications;
+
+            if (!string.IsNullOrEmpty(updateDto.Specializations))
+                user.Specializations = updateDto.Specializations;
+
+            if (!string.IsNullOrEmpty(updateDto.Bio))
+                user.Bio = updateDto.Bio;
+
+            if (updateDto.YearsOfExperience.HasValue)
+                user.YearsOfExperience = updateDto.YearsOfExperience;
+
+            // Serializar SocialLinks para JSON
+            if (updateDto.SocialLinks != null)
+            {
+                user.SocialLinksJson = JsonSerializer.Serialize(updateDto.SocialLinks);
+            }
+
+            // Atualizar data de última modificação
+            user.UpdatedAt = DateTime.UtcNow;
+
             // Atualizar senha se fornecida
             if (!string.IsNullOrEmpty(updateDto.CurrentPassword) && !string.IsNullOrEmpty(updateDto.NewPassword))
             {
@@ -226,6 +252,20 @@ namespace ConnectWorkout.Infrastructure.Services
         // Método para mapear User para UserDto
         private UserDto MapToUserDto(User user, int totalExercisesCount = 0)
         {
+            // Deserializar SocialLinks do JSON
+            SocialLinksDto socialLinks = null;
+            if (!string.IsNullOrEmpty(user.SocialLinksJson))
+            {
+                try
+                {
+                    socialLinks = JsonSerializer.Deserialize<SocialLinksDto>(user.SocialLinksJson);
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogWarning(ex, "Failed to deserialize SocialLinksJson for user {UserId}", user.Id);
+                }
+            }
+
             return new UserDto
             {
                 Id = user.Id,
@@ -241,7 +281,17 @@ namespace ConnectWorkout.Infrastructure.Services
                 HealthConditions = user.HealthConditions,
                 Goal = user.Goal,
                 Observations = user.Observations,
-                TotalExercisesCount = totalExercisesCount
+                TotalExercisesCount = totalExercisesCount,
+
+                // Novos campos
+                Phone = user.Phone,
+                Certifications = user.Certifications,
+                Specializations = user.Specializations,
+                Bio = user.Bio,
+                YearsOfExperience = user.YearsOfExperience,
+                SocialLinks = socialLinks,
+                CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt
             };
         }
     }
