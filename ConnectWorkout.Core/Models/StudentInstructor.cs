@@ -1,4 +1,5 @@
 using System;
+using ConnectWorkout.Core.Enums;
 
 namespace ConnectWorkout.Core.Models
 {
@@ -21,11 +22,26 @@ namespace ConnectWorkout.Core.Models
         /// ID do instrutor
         /// </summary>
         public int InstructorId { get; set; }
-        
+
         /// <summary>
-        /// Data em que a relação foi estabelecida
+        /// Status do convite (Pendente, Aceito, Rejeitado)
         /// </summary>
-        public DateTime ConnectedAt { get; set; } = DateTime.UtcNow;
+        public InvitationStatus Status { get; set; } = InvitationStatus.Pending;
+
+        /// <summary>
+        /// Data em que o convite foi enviado
+        /// </summary>
+        public DateTime InvitedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Data em que o aluno respondeu ao convite (aceitou ou rejeitou)
+        /// </summary>
+        public DateTime? RespondedAt { get; set; }
+
+        /// <summary>
+        /// Data em que a relação foi estabelecida (quando aceita)
+        /// </summary>
+        public DateTime? ConnectedAt { get; set; }
         
         // Propriedades de navegação
         

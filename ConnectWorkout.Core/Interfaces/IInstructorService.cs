@@ -33,5 +33,10 @@ namespace ConnectWorkout.Core.Interfaces
         /// Obtém estatísticas do instrutor
         /// </summary>
         Task<InstructorStatisticsDto> GetInstructorStatisticsAsync(int instructorId, string period = "month");
+
+        /// <summary>
+        /// Obtém todos os convites enviados pelo instrutor
+        /// </summary>
+        Task<IEnumerable<InvitationDto>> GetInvitationsAsync(int instructorId);
     }
 }

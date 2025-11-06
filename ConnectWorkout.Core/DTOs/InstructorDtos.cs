@@ -76,4 +76,57 @@ namespace ConnectWorkout.Core.DTOs
         public StatisticTrendDto CompletionRateTrend { get; set; }
         public StatisticTrendDto WorkoutsCreatedTrend { get; set; }
     }
+
+    /// <summary>
+    /// DTO para informações de convite/conexão com aluno
+    /// </summary>
+    public class InvitationDto
+    {
+        /// <summary>
+        /// ID do relacionamento
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Informações do aluno
+        /// </summary>
+        public StudentInfoDto Student { get; set; }
+
+        /// <summary>
+        /// Status do convite: 0 = Pending, 1 = Accepted, 2 = Rejected
+        /// </summary>
+        public int Status { get; set; }
+
+        /// <summary>
+        /// Nome do status (para facilitar no frontend)
+        /// </summary>
+        public string StatusName { get; set; }
+
+        /// <summary>
+        /// Data em que o convite foi enviado
+        /// </summary>
+        public DateTime InvitedAt { get; set; }
+
+        /// <summary>
+        /// Data em que o aluno respondeu (aceitou ou rejeitou)
+        /// </summary>
+        public DateTime? RespondedAt { get; set; }
+
+        /// <summary>
+        /// Data em que a conexão foi estabelecida
+        /// </summary>
+        public DateTime? ConnectedAt { get; set; }
+    }
+
+    /// <summary>
+    /// DTO para informações básicas do aluno no convite
+    /// </summary>
+    public class StudentInfoDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public int? Age { get; set; }
+        public int? Gender { get; set; }
+    }
 }

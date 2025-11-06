@@ -89,7 +89,7 @@ namespace ConnectWorkout.Core.DTOs
         public int? RestSeconds { get; set; }
 
         [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
-        public string Notes { get; set; }
+        public string? Notes { get; set; }
     }
     
     /// <summary>

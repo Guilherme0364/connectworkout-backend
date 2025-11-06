@@ -249,6 +249,31 @@ namespace ConnectWorkout.Infrastructure.Services
             }
         }
 
+        public async Task DeleteAccountAsync(int userId)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+
+                if (user == null)
+                {
+                    _logger.LogWarning("User with ID {UserId} not found for deletion", userId);
+                    throw new InvalidOperationException("Usuário não encontrado.");
+                }
+
+                _logger.LogInformation("Deleting account for user {UserId} ({UserEmail})", userId, user.Email);
+
+                await _userRepository.DeleteUserAsync(userId);
+
+                _logger.LogInformation("Account for user {UserId} deleted successfully", userId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting account for user {UserId}", userId);
+                throw;
+            }
+        }
+
         // Método para mapear User para UserDto
         private UserDto MapToUserDto(User user, int totalExercisesCount = 0)
         {

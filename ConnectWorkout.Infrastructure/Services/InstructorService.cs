@@ -81,31 +81,45 @@ namespace ConnectWorkout.Infrastructure.Services
                 return false;
             }
 
-            // Verificar se já existe conexão
-            bool connectionExists = await _studentInstructorRepository.ConnectionExistsAsync(
-                student.Id, instructorId);
+            // Verificar se já existe uma conexão aceita
+            bool acceptedConnectionExists = await _studentInstructorRepository
+                .AcceptedConnectionExistsAsync(student.Id, instructorId);
 
-            if (connectionExists)
+            if (acceptedConnectionExists)
             {
                 _logger.LogInformation(
-                    "Connection between instructor {InstructorId} and student {StudentId} already exists",
+                    "Accepted connection between instructor {InstructorId} and student {StudentId} already exists",
                     instructorId, student.Id);
                 return true; // Já está conectado
             }
 
-            // Criar nova conexão
-            var connection = new StudentInstructor
+            // Verificar se já existe um convite pendente
+            bool pendingInvitationExists = await _studentInstructorRepository
+                .PendingInvitationExistsAsync(student.Id, instructorId);
+
+            if (pendingInvitationExists)
+            {
+                _logger.LogInformation(
+                    "Pending invitation already exists for instructor {InstructorId} and student {StudentId}",
+                    instructorId, student.Id);
+                return false; // Não criar convite duplicado
+            }
+
+            // Criar novo convite (pendente)
+            var invitation = new StudentInstructor
             {
                 StudentId = student.Id,
                 InstructorId = instructorId,
-                ConnectedAt = DateTime.UtcNow
+                Status = Core.Enums.InvitationStatus.Pending,
+                InvitedAt = DateTime.UtcNow
+                // ConnectedAt será definido quando o aluno aceitar o convite
             };
 
-            await _studentInstructorRepository.AddAsync(connection);
+            await _studentInstructorRepository.AddAsync(invitation);
             await _studentInstructorRepository.SaveChangesAsync();
 
             _logger.LogInformation(
-                "Connection created between instructor {InstructorId} and student {StudentId}",
+                "Invitation sent from instructor {InstructorId} to student {StudentId}",
                 instructorId, student.Id);
 
             return true;
@@ -113,14 +127,14 @@ namespace ConnectWorkout.Infrastructure.Services
 
         public async Task<bool> RemoveStudentAsync(int instructorId, int studentId)
         {
-            // Verificar se existe conexão
-            bool connectionExists = await _studentInstructorRepository.ConnectionExistsAsync(
-                studentId, instructorId);
-                
-            if (!connectionExists)
+            // Verificar se existe conexão aceita
+            bool acceptedConnectionExists = await _studentInstructorRepository
+                .AcceptedConnectionExistsAsync(studentId, instructorId);
+
+            if (!acceptedConnectionExists)
             {
                 _logger.LogWarning(
-                    "Connection between instructor {InstructorId} and student {StudentId} not found",
+                    "Accepted connection between instructor {InstructorId} and student {StudentId} not found",
                     instructorId, studentId);
                 return false;
             }
@@ -145,10 +159,10 @@ namespace ConnectWorkout.Infrastructure.Services
                 return Enumerable.Empty<StudentSummaryDto>();
             }
 
-            // Obter todos os relacionamentos estudante-instrutor para obter ConnectedAt
+            // Obter todos os relacionamentos estudante-instrutor aceitos para obter ConnectedAt
             var studentRelations = await _studentInstructorRawRepository
-                .FindAsync(si => si.InstructorId == instructorId);
-            var relationshipMap = studentRelations.ToDictionary(si => si.StudentId, si => si.ConnectedAt);
+                .FindAsync(si => si.InstructorId == instructorId && si.Status == Core.Enums.InvitationStatus.Accepted);
+            var relationshipMap = studentRelations.ToDictionary(si => si.StudentId, si => si.ConnectedAt ?? si.InvitedAt);
 
             // Obter todos os alunos do instrutor
             var students = await _userRepository.GetStudentsByInstructorIdAsync(instructorId);
@@ -199,14 +213,14 @@ namespace ConnectWorkout.Infrastructure.Services
 
         public async Task<StudentSummaryDto> GetStudentDetailsAsync(int instructorId, int studentId)
         {
-            // Verificar se existe conexão entre instrutor e aluno
-            bool connectionExists = await _studentInstructorRepository.ConnectionExistsAsync(
-                studentId, instructorId);
+            // Verificar se existe conexão aceita entre instrutor e aluno
+            bool acceptedConnectionExists = await _studentInstructorRepository
+                .AcceptedConnectionExistsAsync(studentId, instructorId);
 
-            if (!connectionExists)
+            if (!acceptedConnectionExists)
             {
                 _logger.LogWarning(
-                    "Connection between instructor {InstructorId} and student {StudentId} not found",
+                    "Accepted connection between instructor {InstructorId} and student {StudentId} not found",
                     instructorId, studentId);
                 return null;
             }
@@ -386,6 +400,52 @@ namespace ConnectWorkout.Infrastructure.Services
                 CompletionRateTrend = completionRateTrend,
                 WorkoutsCreatedTrend = workoutsCreatedTrend
             };
+        }
+
+        public async Task<IEnumerable<InvitationDto>> GetInvitationsAsync(int instructorId)
+        {
+            try
+            {
+                // Buscar todos os relacionamentos do instrutor (todos os status)
+                var invitations = await _studentInstructorRepository.FindAsync(si => si.InstructorId == instructorId);
+
+                var invitationDtos = new List<InvitationDto>();
+
+                foreach (var invitation in invitations)
+                {
+                    // Buscar informações do aluno
+                    var student = await _userRepository.GetByIdAsync(invitation.StudentId);
+
+                    if (student != null)
+                    {
+                        invitationDtos.Add(new InvitationDto
+                        {
+                            Id = invitation.Id,
+                            Student = new StudentInfoDto
+                            {
+                                Id = student.Id,
+                                Name = student.Name,
+                                Email = student.Email,
+                                Age = student.Age,
+                                Gender = (int?)student.Gender
+                            },
+                            Status = (int)invitation.Status,
+                            StatusName = invitation.Status.ToString(),
+                            InvitedAt = invitation.InvitedAt,
+                            RespondedAt = invitation.RespondedAt,
+                            ConnectedAt = invitation.ConnectedAt
+                        });
+                    }
+                }
+
+                // Ordenar por data de convite (mais recente primeiro)
+                return invitationDtos.OrderByDescending(i => i.InvitedAt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting invitations for instructor {InstructorId}", instructorId);
+                return new List<InvitationDto>();
+            }
         }
     }
 }

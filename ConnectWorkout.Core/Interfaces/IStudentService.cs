@@ -18,5 +18,25 @@ namespace ConnectWorkout.Core.Interfaces
         /// Obtém informações detalhadas de um instrutor específico
         /// </summary>
         Task<InstructorSummaryDto> GetInstructorDetailsAsync(int studentId, int instructorId);
+
+        /// <summary>
+        /// Obtém todos os convites pendentes para um aluno
+        /// </summary>
+        Task<IEnumerable<PendingInvitationDto>> GetPendingInvitationsAsync(int studentId);
+
+        /// <summary>
+        /// Aceita um convite de instrutor
+        /// </summary>
+        Task<bool> AcceptInvitationAsync(int studentId, int invitationId);
+
+        /// <summary>
+        /// Rejeita um convite de instrutor
+        /// </summary>
+        Task<bool> RejectInvitationAsync(int studentId, int invitationId);
+
+        /// <summary>
+        /// Obtém a contagem de convites pendentes para um aluno
+        /// </summary>
+        Task<int> GetPendingInvitationsCountAsync(int studentId);
     }
 }

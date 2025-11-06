@@ -1,4 +1,5 @@
 using ConnectWorkout.Core.Models;
+using ConnectWorkout.Core.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ConnectWorkout.Infrastructure.Data
@@ -54,15 +55,28 @@ namespace ConnectWorkout.Infrastructure.Data
             modelBuilder.Entity<StudentInstructor>(entity =>
             {
                 entity.ToTable("StudentInstructors");
-                
+
                 entity.HasKey(si => si.Id);
-                
+
+                // Configurando propriedades
+                entity.Property(si => si.Status)
+                    .IsRequired()
+                    .HasDefaultValue(InvitationStatus.Pending);
+
+                entity.Property(si => si.InvitedAt)
+                    .IsRequired()
+                    .HasDefaultValueSql("GETDATE()");
+
+                entity.Property(si => si.RespondedAt);
+
+                entity.Property(si => si.ConnectedAt);
+
                 // Configurando relação com Student
                 entity.HasOne(si => si.Student)
                     .WithMany(u => u.InstructorsRelations)
                     .HasForeignKey(si => si.StudentId)
                     .OnDelete(DeleteBehavior.Restrict); // Evita exclusão em cascata
-                
+
                 // Configurando relação com Instructor
                 entity.HasOne(si => si.Instructor)
                     .WithMany(u => u.StudentsRelations)

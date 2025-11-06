@@ -38,5 +38,10 @@ namespace ConnectWorkout.Core.Interfaces
         /// Atualiza o perfil de um estudante (Minha ficha)
         /// </summary>
         Task<UserDto> UpdateStudentProfileAsync(int userId, UpdateStudentProfileDto updateDto);
+
+        /// <summary>
+        /// Deleta permanentemente a conta de um usuário e todos os dados relacionados
+        /// </summary>
+        Task DeleteAccountAsync(int userId);
     }
 }

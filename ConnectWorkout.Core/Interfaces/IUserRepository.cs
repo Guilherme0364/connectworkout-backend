@@ -28,5 +28,10 @@ namespace ConnectWorkout.Core.Interfaces
         /// Verifica se um email já está em uso
         /// </summary>
         Task<bool> EmailExistsAsync(string email);
+
+        /// <summary>
+        /// Deleta permanentemente um usuário e todos os dados relacionados
+        /// </summary>
+        Task DeleteUserAsync(int userId);
     }
 }

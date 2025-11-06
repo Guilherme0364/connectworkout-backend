@@ -160,5 +160,71 @@ namespace ConnectWorkout.API.Controllers
 
             return Ok(statistics);
         }
+
+        [HttpGet("invitations")]
+        public async Task<IActionResult> GetInvitations()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Usuário não autenticado." });
+            }
+
+            var instructorId = int.Parse(userIdClaim.Value);
+
+            // Verificar se o usuário é um instrutor
+            var user = await _userService.GetUserByIdAsync(instructorId);
+            if (user == null || user.UserType != UserType.Instructor)
+            {
+                return Forbid();
+            }
+
+            var invitations = await _instructorService.GetInvitationsAsync(instructorId);
+
+            return Ok(invitations);
+        }
+
+        /// <summary>
+        /// Delete the authenticated instructor's account and all associated data
+        /// </summary>
+        [HttpDelete("account")]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DeleteAccount()
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null)
+                {
+                    return Unauthorized(new { message = "Usuário não autenticado." });
+                }
+
+                var instructorId = int.Parse(userIdClaim.Value);
+
+                _logger.LogInformation("Instructor {InstructorId} requesting account deletion", instructorId);
+
+                // Verificar se o usuário é um instrutor
+                var user = await _userService.GetUserByIdAsync(instructorId);
+                if (user == null || user.UserType != UserType.Instructor)
+                {
+                    return Forbid();
+                }
+
+                // Delete account
+                await _userService.DeleteAccountAsync(instructorId);
+
+                _logger.LogInformation("Account deleted successfully for instructor {InstructorId}", instructorId);
+
+                return NoContent();
+            }
+            catch (System.Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting instructor account");
+                return StatusCode(500, new { message = "Error deleting account" });
+            }
+        }
     }
 }

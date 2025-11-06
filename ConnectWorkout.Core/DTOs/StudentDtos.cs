@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace ConnectWorkout.Core.DTOs
@@ -25,5 +26,19 @@ namespace ConnectWorkout.Core.DTOs
         public int WorkoutCount { get; set; }
         public int? ActiveWorkoutId { get; set; }
         public int PendingRequestsCount { get; set; }
+    }
+
+    /// <summary>
+    /// DTO para exibir convites pendentes de instrutores
+    /// </summary>
+    public class PendingInvitationDto
+    {
+        public int InvitationId { get; set; }
+        public int InstructorId { get; set; }
+        public string InstructorName { get; set; }
+        public string InstructorEmail { get; set; }
+        public string InstructorDescription { get; set; }
+        public int InstructorStudentCount { get; set; }
+        public DateTime InvitedAt { get; set; }
     }
 }
